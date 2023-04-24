@@ -34,6 +34,7 @@ pub struct ProverState<'a, F: PrimeField> {
     /// query bound b
     zk_bound: usize,
 
+    x_poly: Option<LabeledPolynomial<F>>,
     w_poly: Option<LabeledPolynomial<F>>,
     mz_polys: Option<(LabeledPolynomial<F>, LabeledPolynomial<F>)>,
 
@@ -157,6 +158,8 @@ impl<F: Field> CanonicalDeserialize for ProverMsg<F> {
 
 /// The first set of prover oracles.
 pub struct ProverFirstOracles<F: Field> {
+    /// The LDE of `x`.
+    pub x: LabeledPolynomial<F>,
     /// The LDE of `w`.
     pub w: LabeledPolynomial<F>,
     /// The LDE of `Az`.
@@ -170,7 +173,7 @@ pub struct ProverFirstOracles<F: Field> {
 impl<F: Field> ProverFirstOracles<F> {
     /// Iterate over the polynomials output by the prover in the first round.
     pub fn iter(&self) -> impl Iterator<Item = &LabeledPolynomial<F>> {
-        vec![&self.w, &self.z_a, &self.z_b, &self.mask_poly].into_iter()
+        vec![&self.x, &self.w, &self.z_a, &self.z_b, &self.mask_poly].into_iter()
     }
 }
 
@@ -293,6 +296,7 @@ impl<F: PrimeField> AHPForR1CS<F> {
             witness_assignment,
             z_a: Some(z_a),
             z_b: Some(z_b),
+            x_poly: None,
             w_poly: None,
             mz_polys: None,
             zk_bound,
@@ -387,6 +391,7 @@ impl<F: PrimeField> AHPForR1CS<F> {
         assert!(z_b_poly.degree() < domain_h.size() + zk_bound);
         assert!(mask_poly.degree() <= 3 * domain_h.size() + 2 * zk_bound - 3);
 
+        let x = LabeledPolynomial::new("x".to_string(), x_poly, None, Some(2));
         let w = LabeledPolynomial::new("w".to_string(), w_poly, None, Some(1));
         let z_a = LabeledPolynomial::new("z_a".to_string(), z_a_poly, None, Some(1));
         let z_b = LabeledPolynomial::new("z_b".to_string(), z_b_poly, None, Some(1));
@@ -394,6 +399,7 @@ impl<F: PrimeField> AHPForR1CS<F> {
             LabeledPolynomial::new("mask_poly".to_string(), mask_poly.clone(), None, None);
 
         let oracles = ProverFirstOracles {
+            x: x.clone(),
             w: w.clone(),
             z_a: z_a.clone(),
             z_b: z_b.clone(),
@@ -429,14 +435,14 @@ impl<F: PrimeField> AHPForR1CS<F> {
 
     /// Output the number of oracles sent by the prover in the first round.
     pub fn prover_num_first_round_oracles() -> usize {
-        4
+        5
     }
 
     /// Output the degree bounds of oracles in the first round.
     pub fn prover_first_round_degree_bounds(
         _info: &IndexInfo<F>,
     ) -> impl Iterator<Item = Option<usize>> {
-        vec![None; 4].into_iter()
+        vec![None; 5].into_iter()
     }
 
     /// Output the second round message and the next state.
@@ -503,11 +509,13 @@ impl<F: PrimeField> AHPForR1CS<F> {
         let domain_x = GeneralEvaluationDomain::new(state.formatted_input_assignment.len())
             .ok_or(SynthesisError::PolynomialDegreeTooLarge)
             .unwrap();
-        let x_poly = EvaluationsOnDomain::from_vec_and_domain(
-            state.formatted_input_assignment.clone(),
-            domain_x,
-        )
-        .interpolate();
+        // let x_poly = EvaluationsOnDomain::from_vec_and_domain(
+        //     state.formatted_input_assignment.clone(),
+        //     domain_x,
+        // )
+        // .interpolate();
+        
+        let x_poly = state.x_poly.as_ref().unwrap();
         let w_poly = state.w_poly.as_ref().unwrap();
         let mut z_poly = w_poly.polynomial().mul_by_vanishing_poly(domain_x);
         cfg_iter_mut!(z_poly.coeffs)

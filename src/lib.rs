@@ -12,7 +12,7 @@
 #![deny(stable_features, unreachable_pub, non_shorthand_field_patterns)]
 #![deny(unused_attributes, unused_imports, unused_mut, missing_docs)]
 #![deny(renamed_and_removed_lints, stable_features, unused_allocation)]
-#![deny(unused_comparisons, bare_trait_objects, unused_must_use, const_err)]
+#![deny(unused_comparisons, bare_trait_objects, unused_must_use)]
 #![forbid(unsafe_code)]
 
 #[macro_use]
@@ -111,7 +111,7 @@ impl<F: PrimeField, PC: PolynomialCommitment<F, DensePolynomial<F>>, FS: FiatSha
 
         let coeff_support = AHPForR1CS::get_degree_bounds(&index.index_info);
         // Marlin only needs degree 2 random polynomials
-        let supported_hiding_bound = 1;
+        let supported_hiding_bound = 1 + 1;
         let (committer_key, verifier_key) = PC::trim(
             &srs,
             index.max_degree(),
