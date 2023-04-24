@@ -406,6 +406,7 @@ impl<F: PrimeField> AHPForR1CS<F> {
             mask_poly: mask_poly.clone(),
         };
 
+        state.x_poly = Some(x);
         state.w_poly = Some(w);
         state.mz_polys = Some((z_a, z_b));
         state.mask_poly = Some(mask_poly);
