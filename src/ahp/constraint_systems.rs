@@ -213,6 +213,8 @@ pub(crate) fn arithmetize_matrix<F: PrimeField>(
         val_c_vec.push(F::zero());
     }
 
+    println!("valc_vec: {:?}", val_c_vec);
+
     let row_col_vec: Vec<_> = row_vec
         .iter()
         .zip(&col_vec)
@@ -237,6 +239,8 @@ pub(crate) fn arithmetize_matrix<F: PrimeField>(
     let val_b = val_b_evals_on_K.clone().interpolate();
     let val_c = val_c_evals_on_K.clone().interpolate();
     let row_col = row_col_evals_on_K.clone().interpolate();
+
+    println!("val_c: {:?}", val_c_evals_on_K);
 
     end_timer!(interpolate_time);
 
@@ -371,6 +375,8 @@ mod tests {
             .elements()
             .zip(output_domain.batch_eval_unnormalized_bivariate_lagrange_poly_with_same_inputs())
             .collect();
+
+        println!("valc: {:?}", joint_arith.evals_on_K.val_c);
 
         let mut rng = ark_std::test_rng();
         let eta_a = F::rand(&mut rng);
