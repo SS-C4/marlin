@@ -191,8 +191,6 @@ pub(crate) fn arithmetize_matrix<F: PrimeField>(
             count += 1;
         }
     }
-    println!("valc_vec: {:?}", val_c_vec);
-    
     ark_ff::batch_inversion::<F>(&mut inverses);
     drop(eq_poly_vals);
 
