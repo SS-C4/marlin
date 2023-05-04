@@ -14,7 +14,7 @@ use ark_poly::{
     GeneralEvaluationDomain, Polynomial, UVPolynomial,
 };
 use ark_relations::r1cs::{
-    ConstraintSynthesizer, ConstraintSystem, OptimizationGoal, SynthesisError,
+    ConstraintSynthesizer, ConstraintSystem, SynthesisError,
 };
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, SerializationError};
 use ark_std::rand::RngCore;
@@ -219,7 +219,7 @@ impl<F: PrimeField> AHPForR1CS<F> {
 
         let constraint_time = start_timer!(|| "Generating constraints and witnesses");
         let pcs = ConstraintSystem::new_ref();
-        pcs.set_optimization_goal(OptimizationGoal::Weight);
+        // pcs.set_optimization_goal(OptimizationGoal::Weight);
         pcs.set_mode(ark_relations::r1cs::SynthesisMode::Prove {
             construct_matrices: true,
         });
